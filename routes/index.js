@@ -11,6 +11,9 @@ router.get('/', async (req, res) => {
         data: posts,
       });
     }
+    return res.status(200).send({
+      data: 'No posts to display',
+    });
   } catch (error) {
     console.log(error);
     return res.status(500).send({

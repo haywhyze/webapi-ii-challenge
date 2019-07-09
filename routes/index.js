@@ -171,4 +171,48 @@ router.get('/:id/comments', async (req, res) => {
   }
 });
 
+router.post('/:id/comments', async (req, res) => {
+  const id = Number(req.params.id);
+  const { text } = req.body;
+  if (Number.isNaN(id) || id % 1 !== 0 || id < 0) {
+    return res.status(400).send({
+      message: 'The post ID provided is not valid',
+    });
+  }
+  try {
+    const post = await db.findById(id);
+    if (post.length) {
+      if (!text) {
+        return res.status(400).send({
+          errorMessage: 'Please provide text for the post.',
+        });
+      }
+
+      const newComment = {
+        text,
+        post_id: id,
+      };
+
+      try {
+        const newCommentId = await db.insertComment(newComment);
+        const newCommentData = await db.findCommentById(newCommentId.id);
+        return res.status(201).json(newCommentData);
+      } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+          error: 'There was an error while saving the comment to the database',
+        });
+      }
+    }
+    return res.status(404).send({
+      message: 'The post with the specified ID does not exist.',
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send({
+      error: 'The post information could not be retrieved.',
+    });
+  }
+});
+
 module.exports = router;

@@ -94,4 +94,45 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
+router.put('/:id', async (req, res) => {
+  const { title, contents } = req.body;
+  const id = Number(req.params.id);
+  if (Number.isNaN(id) || id % 1 !== 0 || id < 0) {
+    return res.status(400).send({
+      message: 'The user ID provided is not valid',
+    });
+  }
+  try {
+    const post = await db.findById(id);
+    if (post.length) {
+      if (!title || !contents) {
+        return res.status(400).send({
+          errorMessage: 'Please provide title and contents for the post.',
+        });
+      }
+      const newPost = {
+        title,
+        contents,
+      };
+      let updatedPost;
+      const updateResponse = await db.update(id, newPost);
+      if (updateResponse === 1) {
+        updatedPost = await db.findById(id);
+        return res.status(200).json(updatedPost);
+      }
+      return res.status(500).json({
+        error: 'The post information could not be modified.',
+      });
+    }
+    return res.status(404).json({
+      message: 'The post with the specified ID does not exist.',
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      error: 'The post information could not be modified.',
+    });
+  }
+});
+
 module.exports = router;

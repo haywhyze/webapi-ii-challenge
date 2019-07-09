@@ -3,6 +3,32 @@ const db = require('../data/db');
 
 const router = express.Router();
 
+router.post('/', async (req, res) => {
+  const { title, contents } = req.body;
+
+  if (!title || !contents) {
+    return res.status(400).send({
+      errorMessage: 'Please provide title and contents for the post.',
+    });
+  }
+
+  const newPost = {
+    title,
+    contents,
+  };
+
+  try {
+    const newPostId = await db.insert(newPost);
+    const newPostData = await db.findById(newPostId.id);
+    return res.status(201).json(newPostData);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      error: 'There was an error while saving the post to the database',
+    });
+  }
+});
+
 router.get('/', async (req, res) => {
   try {
     const posts = await db.find();

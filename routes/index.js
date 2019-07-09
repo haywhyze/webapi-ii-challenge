@@ -135,4 +135,40 @@ router.put('/:id', async (req, res) => {
   }
 });
 
+router.get('/:id/comments', async (req, res) => {
+  const id = Number(req.params.id);
+  if (Number.isNaN(id) || id % 1 !== 0 || id < 0) {
+    return res.status(400).send({
+      message: 'The post ID provided is not valid',
+    });
+  }
+  try {
+    const post = await db.findById(id);
+    if (post.length) {
+      try {
+        const comments = await db.findPostComments(id);
+        if (comments.length) {
+          return res.status(200).send(comments);
+        }
+        return res.status(200).send({
+          data: 'No comments to display',
+        });
+      } catch (error) {
+        console.log(error);
+        return res.status(500).send({
+          error: 'The comments information could not be retrieved.',
+        });
+      }
+    }
+    return res.status(404).send({
+      message: 'The post with the specified ID does not exist.',
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send({
+      error: 'The post information could not be retrieved.',
+    });
+  }
+});
+
 module.exports = router;

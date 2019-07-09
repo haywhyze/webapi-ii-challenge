@@ -7,9 +7,7 @@ router.get('/', async (req, res) => {
   try {
     const posts = await db.find();
     if (posts.length) {
-      return res.status(200).send({
-        data: posts,
-      });
+      return res.status(200).send(posts);
     }
     return res.status(200).send({
       data: 'No posts to display',
@@ -18,6 +16,29 @@ router.get('/', async (req, res) => {
     console.log(error);
     return res.status(500).send({
       error: 'The posts information could not be retrieved.',
+    });
+  }
+});
+
+router.get('/:id', async (req, res) => {
+  const id = Number(req.params.id);
+  if (Number.isNaN(id) || id % 1 !== 0 || id < 0) {
+    return res.status(400).send({
+      message: 'The post ID provided is not valid',
+    });
+  }
+  try {
+    const post = await db.findById(id);
+    if (post.length) {
+      return res.status(200).send(post[0]);
+    }
+    return res.status(404).send({
+      message: 'The post with the specified ID does not exist.',
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send({
+      error: 'The post information could not be retrieved.',
     });
   }
 });

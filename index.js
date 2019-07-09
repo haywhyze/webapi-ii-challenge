@@ -1,4 +1,5 @@
 const express = require('express');
+const router = require('./routes');
 
 const app = express();
 
@@ -10,6 +11,8 @@ app.get('/', (req, res) => {
     message: 'Welcome to Lambda blogs',
   });
 });
+
+app.use('/api/posts', router);
 
 app.all('*', (req, res) => {
   res.status(404).send({
